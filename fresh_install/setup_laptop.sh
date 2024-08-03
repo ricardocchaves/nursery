@@ -231,7 +231,7 @@ EOL
 }
 
 setup_delta() {
-    pushd $(mktemp -d) || return
+    pushd "$(mktemp -d)" || return
     wget https://github.com/dandavison/delta/releases/download/0.17.0/git-delta_0.17.0_amd64.deb
     sudo dpkg -i git-delta_0.17.0_amd64.deb
     rm git-delta_0.17.0_amd64.deb
