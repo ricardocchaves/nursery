@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Waterfox
+GenericName=Web Browser
+Comment=Browse the World Wide Web
+Exec=waterfox
+Terminal=false
+Type=Application
+Icon=~/.local/share/icons/waterfox.ico
+Categories=Network;WebBrowser;

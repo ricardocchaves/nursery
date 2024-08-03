@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Thunderbird
+GenericName=Mail Client
+Comment=Send and receive mail with Thunderbird
+Exec=thunderbird
+Terminal=false
+Type=Application
+Icon=/opt/thunderbird-115.3.3/thunderbird/chrome/icons/default/default256.png
+Categories=Network;Email;
+StartupWMClass=Thunderbird

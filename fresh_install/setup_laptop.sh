@@ -180,6 +180,17 @@ setup_ssh() {
     done
 }
 
+configure_custom_app() {
+    app_name=$1
+
+    c_yellow "Configuring $app_name"
+    config_dir="$HOME/.local/share/applications"
+    remote_config="https://raw.githubusercontent.com/ricardocchaves/nursery/master/fresh_install/applications/$app_name.desktop"
+    mkdir -p "$config_dir"
+    wget "$remote_config" -O "$config_dir/"
+    chmod +x "$HOME/$app_name.desktop"
+}
+
 setup_waterfox() {
     if ! waterfox --version >/dev/null 2>&1; then
         c_yellow "Installing Waterfox"
@@ -192,18 +203,8 @@ setup_waterfox() {
 
         mkdir -p ~/.local/share/icons/
         curl https://www.waterfox.net/_astro/waterfox.aA4DFn78.svg -O ~/.local/share/icons/waterfox.ico
-        cat > ~/.local/share/applications/waterfox.desktop <<EOL
-[Desktop Entry]
-Name=Waterfox
-GenericName=Web Browser
-Comment=Browse the World Wide Web
-Exec=waterfox
-Terminal=false
-Type=Application
-Icon=~/.local/share/icons/waterfox.ico
-Categories=Network;WebBrowser;
-EOL
-    chmod +x ~/.local/share/applications/waterfox.desktop
+
+        configure_custom_app waterfox
     fi
 }
 
@@ -213,21 +214,7 @@ setup_thunderbird() {
         return
     fi
 
-    c_yellow "Configuring Thunderbird"
-    icon_path="/opt/thunderbird-115.3.3/thunderbird/chrome/icons/default/default256.png"
-    cat > ~/.local/share/applications/thunderbird.desktop <<EOL
-[Desktop Entry]
-Name=Thunderbird
-GenericName=Mail Client
-Comment=Send and receive mail with Thunderbird
-Exec=thunderbird
-Terminal=false
-Type=Application
-Icon=$icon_path
-Categories=Network;Email;
-StartupWMClass=Thunderbird
-EOL
-    chmod +x ~/.local/share/applications/thunderbird.desktop
+    configure_custom_app thunderbird
 }
 
 setup_delta() {
