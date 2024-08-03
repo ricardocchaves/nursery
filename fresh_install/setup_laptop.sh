@@ -247,6 +247,25 @@ setup_manual_apps() {
     sudo update-desktop-database
 }
 
+setup_terminator() {
+    c_yellow "Configuring Terminator"
+
+    # Download fonts
+    pushd "$(mktemp -d)" || return
+    git clone https://github.com/powerline/fonts.git --depth=1
+    pushd fonts || return
+    ./install.sh
+    popd || return
+    rm -rf fonts
+    popd || return
+
+    # Configure Terminator
+    config_dir="$HOME/.config/terminator"
+    remote_config="https://raw.githubusercontent.com/ricardocchaves/nursery/master/fresh_install/config/terminator/config"
+    mkdir -p "$config_dir"
+    wget "$remote_config" -O "$config_dir/config"
+}
+
 setup_git_repos() {
     c_yellow "Cloning git repositories"
     clone_n1() {
@@ -330,6 +349,7 @@ setup_aws
 setup_zsh
 setup_ssh
 setup_manual_apps
+setup_terminator
 configure_gnome_general
 configure_gnome_dock
 setup_git_repos
