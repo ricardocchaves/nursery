@@ -192,20 +192,23 @@ configure_custom_app() {
 }
 
 setup_waterfox() {
-    if ! waterfox --version >/dev/null 2>&1; then
-        c_yellow "Installing Waterfox"
-        pushd "$(mktemp -d)" || return
-        wget https://cdn1.waterfox.net/waterfox/releases/G6.0.17/Linux_x86_64/waterfox-G6.0.17.tar.bz2
-        tar -xvf waterfox-G6.0.17.tar.bz2
-        sudo mv waterfox /opt
-        sudo ln -s /opt/waterfox/waterfox /usr/bin/waterfox
-        popd || return
-
-        mkdir -p ~/.local/share/icons/
-        curl https://www.waterfox.net/_astro/waterfox.aA4DFn78.svg -O ~/.local/share/icons/waterfox.ico
-
-        configure_custom_app waterfox
+    if waterfox --version >/dev/null 2>&1; then
+        c_green "Waterfox is already installed"
+        return
     fi
+
+    c_yellow "Installing Waterfox"
+    pushd "$(mktemp -d)" || return
+    wget https://cdn1.waterfox.net/waterfox/releases/G6.0.17/Linux_x86_64/waterfox-G6.0.17.tar.bz2
+    tar -xvf waterfox-G6.0.17.tar.bz2
+    sudo mv waterfox /opt
+    sudo ln -s /opt/waterfox/waterfox /usr/bin/waterfox
+    popd || return
+
+    mkdir -p ~/.local/share/icons/
+    curl https://www.waterfox.net/_astro/waterfox.aA4DFn78.svg -O ~/.local/share/icons/waterfox.ico
+
+    configure_custom_app waterfox
 }
 
 setup_thunderbird() {
