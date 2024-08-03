@@ -26,6 +26,8 @@ c_blue() {
 }
 
 init() {
+    sudo add-apt-repository -y ppa:appimagelauncher-team/stable
+
     sudo apt update
     sudo apt upgrade
 }
@@ -73,7 +75,7 @@ configure_gnome_general() {
 }
 
 setup_apt() {
-    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils"
+    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher"
     to_install=""
     for pkg in $pkgs; do
         c_blue "Checking if $pkg is installed"
@@ -228,11 +230,35 @@ setup_delta() {
     popd || return
 }
 
+setup_obsidian() {
+    if obsidian --version >/dev/null 2>&1; then
+        c_green "Obsidian is already installed"
+        return
+    fi
+
+    c_yellow "Installing Obsidian"
+    pushd "$(mktemp -d)" || return
+    repo="obsidianmd/obsidian-releases"
+    latest_release=$(curl --silent "https://api.github.com/repos/$repo/releases/latest" | jq -r .tag_name)
+    appimage="Obsidian-${latest_release//v/}.AppImage"
+    wget "https://github.com/obsidianmd/obsidian-releases/releases/download/$latest_release/$appimage"
+    chmod +x "$appimage"
+    ./"$appimage"
+    popd || return
+
+    c_blue "Configuring Obsidian"
+    config_dir="$HOME/.config/obsidian"
+    remote_config="https://raw.githubusercontent.com/ricardocchaves/nursery/master/fresh_install/config/terminator/obsidian.json"
+    mkdir -p "$config_dir"
+    wget "$remote_config" -O "$config_dir/obsidian.json"
+}
+
 setup_manual_apps() {
     c_yellow "Configuring manual apps"
     setup_waterfox
     setup_thunderbird
     setup_delta
+    setup_obsidian
     sudo gtk-update-icon-cache /usr/share/icons/hicolor
     sudo update-desktop-database
 }
