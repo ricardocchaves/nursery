@@ -75,7 +75,7 @@ configure_gnome_general() {
 }
 
 setup_apt() {
-    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher"
+    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher python3-pip"
     to_install=""
     for pkg in $pkgs; do
         c_blue "Checking if $pkg is installed"
@@ -338,6 +338,43 @@ setup_git_repos() {
     popd || return
 }
 
+setup_vdoodle() {
+    c_yellow "Setting up vdoodle"
+    if cloud-vehicle -h >/dev/null 2>&1; then
+        c_green "vdoodle tools are already installed"
+        return
+    fi
+
+    if [ ! -f ~/.veniam/cloud_envs.json ]; then
+        c_red "Please create ~/.veniam/cloud_envs.json"
+        return
+    fi
+
+    vpn_pid=0
+    if ! wget -q --spider --timeout=1 --tries=1 http://pypi.pint.nexar.mobi/simple; then
+        c_blue "Starting dev VPN in the background"
+        sudo openvpn --config ~/vpn/dev_ricardochaves.ovpn &
+        vpn_pid=$!
+    fi
+
+    sudo apt install -y liblzo2-dev
+    if ! wget -q --spider --timeout=2 --tries=5 http://pypi.pint.nexar.mobi/simple; then
+        c_red "Enable dev VPN to access pypi.pint.nexar.mobi"
+        return
+    fi
+
+    pip config --user set global.index-url http://pypi.pint.nexar.mobi/simple
+    pip config --user set global.trusted-host pypi.pint.nexar.mobi
+
+    pip install wget
+    pip install vdoodle
+
+    if [ $vpn_pid -ne 0 ]; then
+        c_blue "Stopping dev VPN"
+        kill $vpn_pid
+    fi
+}
+
 setup_swap() {
     if zfs list | grep -q swap; then
         return
@@ -369,4 +406,5 @@ setup_terminator
 configure_gnome_general
 configure_gnome_dock
 setup_git_repos
+setup_vdoodle
 setup_swap
