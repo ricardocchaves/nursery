@@ -293,11 +293,18 @@ setup_git_repos() {
 
         c_blue "Cloning $repo and derivatives"
         git clone git@github.com:getnexar/$repo.git
+
         cp -r $repo nexar_vanilla
+        git -C nexar_vanilla checkout code_all
+
         cp -r $repo nexar_fw0
+        git -C nexar_fw0 checkout b0hw-fw0
+
         git -C $repo submodule update --init nexar-client-sdk
         git -C $repo/nexar-client-sdk submodule update --init external
+
         cp -r $repo nexar_b0
+        git -C nexar_b0 checkout code_all_fw2
 
         c_blue "Configuring podman"
         pushd nexar_b0 || return
