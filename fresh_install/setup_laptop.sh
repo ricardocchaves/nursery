@@ -387,6 +387,24 @@ setup_vdoodle() {
     fi
 }
 
+setup_ambausb() {
+    if which ambausb >/dev/null 2>&1; then
+        c_green "AmbaUSB is already installed"
+        return
+    fi
+
+    c_yellow "Setting up AmbaUSB"
+    ambausb_repo="$HOME/repos/nexar_b0"
+    deb_path="$ambausb_repo/rtos_82001/cortex_a/tools/AmbaUSB/AmbaUSB_v5.0.4/Ubuntu/Debs/20.04/ambausb_5.0.4-1_amd64.deb"
+    sudo apt install libqt5multimedia5 # Dependencies
+    sudo dpkg -i $deb_path
+
+    config_dir="$HOME/.config/Ambarella"
+    remote_config="https://raw.githubusercontent.com/ricardocchaves/nursery/master/fresh_install/config/Ambarella/ambausb.conf"
+    mkdir -p "$config_dir"
+    wget "$remote_config" -O "$config_dir/ambausb.conf"
+}
+
 setup_swap() {
     if zfs list | grep -q swap; then
         return
@@ -419,4 +437,5 @@ configure_gnome_general
 configure_gnome_dock
 setup_git_repos
 setup_vdoodle
+setup_ambausb
 setup_swap
