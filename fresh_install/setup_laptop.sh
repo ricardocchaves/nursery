@@ -2,6 +2,18 @@
 # Setup fresh Ubuntu laptop
 # Install: sh -c "$(curl -fsSL setup.ricardochaves.pt)"
 
+# TODO: Setup vsCode extensions
+# TODO: Setup wireguard
+# TODO: Setup spyql
+# TODO: Completely setup oh-my-zsh configs
+# TODO: Setup Waterfox extensions, bookmarks
+# TODO: Setup regular usage files in private standalone repo:
+# - .zsh_history
+# - .zshrc
+# - Documents/Obsidian Vault
+# - .gitconfig
+# TODO: Configure Obsidian remotely, automatically download notes on fresh install
+
 # Define color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
