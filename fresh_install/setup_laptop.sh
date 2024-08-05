@@ -188,7 +188,8 @@ setup_secrets() {
     read -p "Enter the vault URL [user@remote]: " VAULT_URL
     SECRETS_DIR=$(mktemp -d)
     pushd "$SECRETS_DIR" || return
-    scp -rP 23 $VAULT_URL:~/.secrets_vault .
+    # Compress and download the secrets; faster than scp or rsync
+    ssh -p 23 "$VAULT_URL" "tar czf - -C ~/.secrets_vault ." | tar xzf - -C .
     SECRETS_DIR="$SECRETS_DIR/.secrets_vault"
     popd || return
 
