@@ -291,12 +291,24 @@ setup_git_repos() {
             return
         fi
 
+        c_blue "Cloning $repo and derivatives"
         git clone git@github.com:getnexar/$repo.git
         cp -r $repo nexar_vanilla
         cp -r $repo nexar_fw0
         git -C $repo submodule update --init nexar-client-sdk
         git -C $repo/nexar-client-sdk submodule update --init external
         cp -r $repo nexar_b0
+
+        c_blue "Configuring podman"
+        pushd nexar_b0 || return
+        git checkout code_all_fw2
+        ./tools/PodmanInstaller.sh
+        popd || return
+
+        c_blue "Installing dev scripts"
+        pushd nexar_n1/nexar-client-sdk/tools/development || return
+        ./install.sh
+        popd || return
     }
     clone_nexar() {
         repos="veniam-nexar-os"
