@@ -25,6 +25,9 @@ c_blue() {
     echo -e "${BLUE}$1${NC}"
 }
 
+VAULT_URL=""
+SECRETS_DIR=""
+
 init() {
     sudo add-apt-repository -y ppa:appimagelauncher-team/stable
 
@@ -168,17 +171,28 @@ setup_zsh() {
     sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 }
 
+setup_secrets() {
+    c_yellow "Downloading secrets"
+    read -p "Enter the vault URL [user@remote]: " VAULT_URL
+    SECRETS_DIR=$(mktemp -d)
+    pushd "$SECRETS_DIR" || return
+    scp -rP 23 $VAULT_URL:~/.secrets_vault .
+    SECRETS_DIR="$SECRETS_DIR/.secrets_vault"
+    popd || return
+
+    source "$SECRETS_DIR/config.sh"
+
+    cp -r "$SECRETS_DIR/nexar" ~/.nexar
+}
+
 setup_ssh() {
-    c_yellow "Setting up existing SSH keys"
-    keys="id_ed25519 id_rsa id_tuning nexar_ed25519 ricardochaves_ua"
-    for key in $keys; do
-        key_path="$HOME/.ssh/$key"
-        if [ ! -f "$key_path" ]; then
-            c_red "$key not found"
-            continue
-        fi
-        chmod 700 "$key_path"
-        ssh-add "$key_path"
+    c_yellow "Setting up SSH keys"
+    ssh_dir="$HOME/.ssh"
+    mkdir -p "$ssh_dir"
+    cp -r "$SECRETS_DIR/ssh" "$ssh_dir"
+    find "$ssh_dir" -name "*.pub" | sed 's/\.pub//g' | while IFS= read -r key; do
+        chmod 700 "$key"
+        ssh-add "$key"
     done
 }
 
@@ -207,6 +221,7 @@ setup_waterfox() {
     sudo ln -s /opt/waterfox/waterfox /usr/bin/waterfox
     popd || return
 
+    # TODO: Use native icon without downloading
     mkdir -p ~/.local/share/icons/
     curl https://www.waterfox.net/_astro/waterfox.aA4DFn78.svg -O ~/.local/share/icons/waterfox.ico
 
@@ -298,31 +313,30 @@ setup_git_repos() {
         c_blue "Cloning $repo and derivatives"
         git clone git@github.com:getnexar/$repo.git
 
-        cp -r $repo nexar_vanilla
-        git -C nexar_vanilla checkout code_all
+        cp -r $repo "$NX_REPO_1"
+        git -C "$NX_REPO_1" checkout "$NX_REPO_1_BRANCH"
 
-        cp -r $repo nexar_fw0
-        git -C nexar_fw0 checkout b0hw-fw0
+        cp -r $repo "$NX_REPO_2"
+        git -C "$NX_REPO_2" checkout "$NX_REPO_2_BRANCH"
 
         git -C $repo submodule update --init nexar-client-sdk
         git -C $repo/nexar-client-sdk submodule update --init external
 
-        cp -r $repo nexar_b0
-        git -C nexar_b0 checkout code_all_fw2
+        cp -r $repo "$NX_REPO_3"
+        git -C "$NX_REPO_3" checkout "$NX_REPO_3_BRANCH"
 
         c_blue "Configuring podman"
-        pushd nexar_b0 || return
-        git checkout code_all_fw2
+        pushd "$NX_REPO_3" || return
         ./tools/PodmanInstaller.sh
         popd || return
 
         c_blue "Installing dev scripts"
-        pushd nexar_n1/nexar-client-sdk/tools/development || return
+        pushd $repo/nexar-client-sdk/tools/development || return
         ./install.sh
         popd || return
     }
     clone_nexar() {
-        repos="veniam-nexar-os"
+        repos="$NX_REPO_4"
         for repo in $repos; do
             if [ -d "$repo" ]; then
                 c_green "$repo is already cloned"
@@ -368,33 +382,34 @@ setup_vdoodle() {
         return
     fi
 
-    if [ ! -f ~/.veniam/cloud_envs.json ]; then
-        c_red "Please create ~/.veniam/cloud_envs.json"
+    cp -r "$SECRETS_DIR/veniam" "$HOME/$(dirname "$VNM_CRED")"
+    if [ ! -f "$HOME/$VNM_CRED" ]; then
+        c_red "Please create ~/$VNM_CRED"
         return
     fi
 
     vpn_pid=0
-    if ! wget -q --spider --timeout=1 --tries=1 http://pypi.pint.nexar.mobi/simple; then
+    if ! wget -q --spider --timeout=1 --tries=1 "$VNM_PYPI_URL"; then
         c_blue "Starting dev VPN in the background"
         sudo openvpn --config ~/vpn/dev_ricardochaves.ovpn &
         vpn_pid=$!
     fi
 
     sudo apt install -y liblzo2-dev
-    if ! wget -q --spider --timeout=2 --tries=5 http://pypi.pint.nexar.mobi/simple; then
-        c_red "Enable dev VPN to access pypi.pint.nexar.mobi"
+    if ! wget -q --spider --timeout=2 --tries=5 "$VNM_PYPI_URL"; then
+        c_red "Enable dev VPN to access $VNM_PYPI"
         return
     fi
 
-    pip config --user set global.index-url http://pypi.pint.nexar.mobi/simple
-    pip config --user set global.trusted-host pypi.pint.nexar.mobi
+    pip config --user set global.index-url "$VNM_PYPI_URL"
+    pip config --user set global.trusted-host "$VNM_PYPI"
 
     pip install wget
     pip install vdoodle
 
     if [ $vpn_pid -ne 0 ]; then
         c_blue "Stopping dev VPN"
-        kill $vpn_pid
+        sudo killall openvpn
     fi
 }
 
@@ -405,10 +420,10 @@ setup_ambausb() {
     fi
 
     c_yellow "Setting up AmbaUSB"
-    ambausb_repo="$HOME/repos/nexar_b0"
-    deb_path="$ambausb_repo/rtos_82001/cortex_a/tools/AmbaUSB/AmbaUSB_v5.0.4/Ubuntu/Debs/20.04/ambausb_5.0.4-1_amd64.deb"
+    ambausb_repo="$HOME/repos/$NX_REPO_3"
+    deb_path="$ambausb_repo/$NX_AMBAUSB_DEB"
     sudo apt install libqt5multimedia5 # Dependencies
-    sudo dpkg -i $deb_path
+    sudo dpkg -i "$deb_path"
 
     download_config "Ambarella/ambausb.conf"
 }
@@ -436,6 +451,7 @@ fi
 setup_apt
 setup_snap
 setup_docker
+setup_secrets
 setup_aws
 setup_zsh
 setup_ssh
