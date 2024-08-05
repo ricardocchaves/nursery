@@ -286,6 +286,19 @@ setup_manual_apps() {
     sudo update-desktop-database
 }
 
+download_home_scripts() {
+    c_yellow "Downloading HOME scripts"
+
+    # Get the list of files in the folder
+    files=$(curl -s "https://api.github.com/repos/ricardocchaves/nursery/contents/script_dump" | jq -r '.[] | select(.type=="file") | .download_url')
+
+    # Use wget to download each file
+    for file in $files; do
+        wget "$file" -P "$HOME"
+        chmod +x "$HOME/$(basename "$file")"
+    done
+}
+
 setup_terminator() {
     c_yellow "Configuring Terminator"
 
@@ -456,6 +469,7 @@ setup_aws
 setup_zsh
 setup_ssh
 setup_manual_apps
+download_home_scripts
 setup_terminator
 configure_gnome_general
 configure_gnome_dock
