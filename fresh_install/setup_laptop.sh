@@ -230,6 +230,18 @@ setup_delta() {
     popd || return
 }
 
+download_config() {
+    config_path="$1"
+    app_name=$(echo "$config_path" | cut -d'/' -f1)
+    config_file=$(echo "$config_path" | cut -d'/' -f2)
+
+    c_blue "Configuring $app_name"
+    config_dir="$HOME/.config/$app_name"
+    remote_config="https://raw.githubusercontent.com/ricardocchaves/nursery/master/fresh_install/config/$config_path"
+    mkdir -p "$config_dir"
+    wget "$remote_config" -O "$config_dir/$config_file"
+}
+
 setup_obsidian() {
     if obsidian --version >/dev/null 2>&1; then
         c_green "Obsidian is already installed"
@@ -246,11 +258,7 @@ setup_obsidian() {
     ./"$appimage"
     popd || return
 
-    c_blue "Configuring Obsidian"
-    config_dir="$HOME/.config/obsidian"
-    remote_config="https://raw.githubusercontent.com/ricardocchaves/nursery/master/fresh_install/config/terminator/obsidian.json"
-    mkdir -p "$config_dir"
-    wget "$remote_config" -O "$config_dir/obsidian.json"
+    download_config "obsidian/obsidian.json"
 }
 
 setup_manual_apps() {
@@ -275,11 +283,7 @@ setup_terminator() {
     rm -rf fonts
     popd || return
 
-    # Configure Terminator
-    config_dir="$HOME/.config/terminator"
-    remote_config="https://raw.githubusercontent.com/ricardocchaves/nursery/master/fresh_install/config/terminator/config"
-    mkdir -p "$config_dir"
-    wget "$remote_config" -O "$config_dir/config"
+    download_config "terminator/config"
 }
 
 setup_git_repos() {
@@ -406,10 +410,7 @@ setup_ambausb() {
     sudo apt install libqt5multimedia5 # Dependencies
     sudo dpkg -i $deb_path
 
-    config_dir="$HOME/.config/Ambarella"
-    remote_config="https://raw.githubusercontent.com/ricardocchaves/nursery/master/fresh_install/config/Ambarella/ambausb.conf"
-    mkdir -p "$config_dir"
-    wget "$remote_config" -O "$config_dir/ambausb.conf"
+    download_config "Ambarella/ambausb.conf"
 }
 
 setup_swap() {
