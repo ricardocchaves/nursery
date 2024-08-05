@@ -97,7 +97,7 @@ setup_apt() {
 
 setup_snap() {
     c_yellow "Installing snap packages"
-    pkgs="slack spotify"
+    pkgs="slack spotify discord"
     to_install=""
     check_whats_installed() {
         for pkg in $pkgs; do
