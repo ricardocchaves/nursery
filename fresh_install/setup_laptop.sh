@@ -90,7 +90,7 @@ configure_gnome_general() {
 }
 
 setup_apt() {
-    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher python3-pip picocom sshpass"
+    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher python3-pip picocom sshpass tree"
     to_install=""
     for pkg in $pkgs; do
         c_blue "Checking if $pkg is installed"
