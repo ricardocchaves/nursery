@@ -281,7 +281,7 @@ setup_obsidian() {
     repo="obsidianmd/obsidian-releases"
     latest_release=$(curl --silent "https://api.github.com/repos/$repo/releases/latest" | jq -r .tag_name)
     appimage="Obsidian-${latest_release//v/}.AppImage"
-    wget "https://github.com/obsidianmd/obsidian-releases/releases/download/$latest_release/$appimage"
+    wget "https://github.com/$repo/releases/download/$latest_release/$appimage"
     chmod +x "$appimage"
     ./"$appimage"
     popd || return
