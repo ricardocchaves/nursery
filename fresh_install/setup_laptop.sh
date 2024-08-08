@@ -289,12 +289,31 @@ setup_obsidian() {
     download_config "obsidian/obsidian.json"
 }
 
+setup_audacity() {
+    if which audacity >/dev/null 2>&1; then
+        c_green "Audacity is already installed"
+        return
+    fi
+
+    c_yellow "Installing Audacity"
+    pushd "$(mktemp -d)" || return
+    repo="audacity/audacity"
+    latest_release=$(curl --silent "https://api.github.com/repos/$repo/releases/latest" | jq -r .tag_name)
+    latest_release_version=$(echo $latest_release | cut -d'-' -f2)
+    appimage="audacity-linux-${latest_release_version}-x64.AppImage"
+    wget "https://github.com/$repo/releases/download/$latest_release/$appimage"
+    chmod +x "$appimage"
+    ./"$appimage"
+    popd || return
+}
+
 setup_manual_apps() {
     c_yellow "Configuring manual apps"
     setup_waterfox
     setup_thunderbird
     setup_delta
     setup_obsidian
+    setup_audacity
     sudo gtk-update-icon-cache /usr/share/icons/hicolor
     sudo update-desktop-database
 }
