@@ -487,6 +487,13 @@ setup_swap() {
     sudo swapon -av
 }
 
+# In the Lenovo laptop, there are power-supply issues that freeze the system. So we need to set these flags.
+setup_grub() {
+    c_yellow "Setting up GRUB"
+    sudo sed -i 's/GRUB_CMDLINE_LINUX_=""/GRUB_CMDLINE_LINUX="intel_idle.max_cstate=1 i915.enable_dc=0 ahci.mobile_lpm_policy=1 ahci.mobile_lpm_policy=1"/g' /etc/default/grub
+    sudo update-grub
+}
+
 c_yellow "Starting laptop setup"
 if ! is_setup_done; then
     init
@@ -509,3 +516,4 @@ setup_git_repos
 setup_vdoodle
 setup_ambausb
 setup_swap
+setup_grub
