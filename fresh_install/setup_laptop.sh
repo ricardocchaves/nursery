@@ -90,7 +90,7 @@ configure_gnome_general() {
 }
 
 setup_apt() {
-    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher python3-pip picocom sshpass tree"
+    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher python3-pip picocom sshpass tree ffmpeg"
     to_install=""
     for pkg in $pkgs; do
         c_blue "Checking if $pkg is installed"
@@ -112,7 +112,7 @@ setup_apt() {
 
 setup_snap() {
     c_yellow "Installing snap packages"
-    pkgs="slack spotify discord"
+    pkgs="slack spotify discord vlc"
     to_install=""
     check_whats_installed() {
         for pkg in $pkgs; do
