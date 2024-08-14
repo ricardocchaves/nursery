@@ -4,7 +4,6 @@
 
 # TODO: Setup vsCode extensions
 # TODO: Setup wireguard
-# TODO: Setup spyql
 # TODO: Completely setup oh-my-zsh configs
 # TODO: Setup Waterfox extensions, bookmarks
 # TODO: Setup regular usage files in private standalone repo:
@@ -132,6 +131,11 @@ setup_snap() {
 
     c_yellow "Installing missing snap packages [$to_install]"
     sudo snap install $to_install
+}
+
+setup_pip_packages() {
+    pkgs="spyql"
+    pip install $pkgs
 }
 
 setup_docker() {
