@@ -3,7 +3,6 @@
 # Install: sh -c "$(curl -fsSL setup.ricardochaves.pt)"
 
 # TODO: Setup vsCode extensions
-# TODO: Setup wireguard
 # TODO: Completely setup oh-my-zsh configs
 # TODO: Setup Waterfox extensions, bookmarks
 # TODO: Setup regular usage files in private standalone repo:
@@ -87,7 +86,7 @@ configure_gnome_general() {
 }
 
 setup_apt() {
-    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher python3-pip picocom sshpass tree ffmpeg"
+    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher python3-pip picocom sshpass tree ffmpeg wireguard"
     to_install=""
     for pkg in $pkgs; do
         c_blue "Checking if $pkg is installed"
@@ -209,6 +208,11 @@ setup_ssh() {
         chmod 700 "$key"
         ssh-add "$key"
     done
+}
+
+setup_wireguard() {
+    c_yellow "Setting up Wireguard"
+    sudo cp "$SECRETS_DIR/wireguard/wg0.conf" /etc/wireguard/
 }
 
 configure_custom_app() {
@@ -530,6 +534,7 @@ setup_secrets
 setup_aws
 setup_zsh
 setup_ssh
+setup_wireguard
 setup_manual_apps
 download_home_scripts
 setup_terminator
