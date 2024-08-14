@@ -10,9 +10,7 @@
 # TODO: Setup regular usage files in private standalone repo:
 # - .zsh_history
 # - .zshrc
-# - Documents/Obsidian Vault
 # - .gitconfig
-# TODO: Configure Obsidian remotely, automatically download notes on fresh install
 
 # Define color codes
 RED='\033[0;31m'
@@ -348,6 +346,11 @@ setup_terminator() {
 
 setup_git_repos() {
     c_yellow "Cloning git repositories"
+    apply_personal_git_config() {
+        git config --local user.name "Ricardo Chaves"
+        git config --local user.email "ricardochaves@ua.pt"
+        git config --local core.sshCommand "ssh -i ~/.ssh/ricardochaves_ua"
+    }
     clone_n1() {
         repo="nexar_n1"
         if [ -d "$repo" ]; then
@@ -392,7 +395,7 @@ setup_git_repos() {
         done
     }
     clone_others() {
-        clone_urls="git@github.com:ricardocchaves/nursery.git"
+        clone_urls="git@github.com:ricardocchaves/nursery.git git@github.com:ricardocchaves/notes.git"
         for url in $clone_urls; do
             repo=$(basename $url .git)
             if [ -d "$repo" ]; then
@@ -405,9 +408,11 @@ setup_git_repos() {
                 mv $repo nursery_personal
                 repo="nursery_personal"
                 pushd $repo || return
-                git config --local user.name "Ricardo Chaves"
-                git config --local user.email "ricardochaves@ua.pt"
-                git config --local core.sshCommand "ssh -i ~/.ssh/ricardochaves_ua"
+                apply_personal_git_config
+                popd || return
+            elif [ "$repo" == "notes" ]; then
+                pushd $repo || return
+                apply_personal_git_config
                 popd || return
             fi
         done
@@ -418,6 +423,20 @@ setup_git_repos() {
     clone_nexar
     clone_others
     popd || return
+}
+
+setup_obsidian_notes() {
+    c_yellow "Setting up Obsidian notes"
+    vault_repo="$HOME/repos/notes/obsidian"
+    vault_dir="$HOME/Documents/ObsidianVault"
+    if [ -d "$vault_dir" ]; then
+        c_green "Obsidian notes are already setup"
+        return
+    fi
+
+    ln -s "$vault_repo" "$vault_dir"
+    c_blue "Configuring Obsidian sync"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ricardocchaves/nursery/master/services/create_obsidianSync.sh)"
 }
 
 setup_vdoodle() {
@@ -513,6 +532,7 @@ setup_terminator
 configure_gnome_general
 configure_gnome_dock
 setup_git_repos
+setup_obsidian_notes
 setup_vdoodle
 setup_ambausb
 setup_swap
