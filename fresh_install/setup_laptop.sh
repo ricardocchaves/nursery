@@ -490,7 +490,7 @@ setup_swap() {
 # In the Lenovo laptop, there are power-supply issues that freeze the system. So we need to set these flags.
 setup_grub() {
     c_yellow "Setting up GRUB"
-    sudo sed -i 's/GRUB_CMDLINE_LINUX_=""/GRUB_CMDLINE_LINUX="intel_idle.max_cstate=1 i915.enable_dc=0 ahci.mobile_lpm_policy=1 ahci.mobile_lpm_policy=1"/g' /etc/default/grub
+    sudo sed -i 's/GRUB_CMDLINE_LINUX_=""/GRUB_CMDLINE_LINUX="intel_idle.max_cstate=3 ahci.mobile_lpm_policy=1"/g' /etc/default/grub
     sudo update-grub
 }
 
