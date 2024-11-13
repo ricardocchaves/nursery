@@ -83,6 +83,7 @@ configure_gnome_general() {
     gsettings set org.gnome.desktop.interface clock-show-seconds true
     gsettings set org.gnome.shell favorite-apps "['slack_slack.desktop', 'spotify_spotify.desktop', 'code_code.desktop', 'waterfox.desktop', 'thunderbird.desktop']"
     gsettings set org.gnome.shell.extensions.ding show-home false
+    xdg-settings set default-web-browser waterfox.desktop
 }
 
 setup_apt() {
