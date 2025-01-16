@@ -545,5 +545,5 @@ setup_git_repos
 setup_obsidian_notes
 setup_vdoodle
 setup_ambausb
-setup_swap
-setup_grub
+#setup_swap
+#setup_grub
