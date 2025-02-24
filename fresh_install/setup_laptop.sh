@@ -37,8 +37,6 @@ VAULT_URL=""
 SECRETS_DIR=""
 
 init() {
-    sudo add-apt-repository -y ppa:appimagelauncher-team/stable
-
     sudo apt update
     sudo apt upgrade
 }
@@ -304,18 +302,28 @@ setup_audacity() {
 
     c_yellow "Installing Audacity"
     pushd "$(mktemp -d)" || return
-    repo="audacity/audacity"
-    latest_release=$(curl --silent "https://api.github.com/repos/$repo/releases/latest" | jq -r .tag_name)
-    latest_release_version=$(echo $latest_release | cut -d'-' -f2)
-    appimage="audacity-linux-${latest_release_version}-x64.AppImage"
-    wget "https://github.com/$repo/releases/download/$latest_release/$appimage"
-    chmod +x "$appimage"
-    ./"$appimage"
+    sudo add-apt-repository -y ppa:ubuntuhandbook1/audacity
+    sudo apt install -y audacity
+    popd || return
+}
+
+setup_appimagelauncher() {
+    if which AppImageLauncher 2>&1; then
+        c_green "AppImageLaunched is already installed"
+	return
+    fi
+
+    c_yellow "Installing app-image-launcher"
+    pushd "$(mktemp -d)" || return
+    repo="TheAssassin/AppImageLauncher"
+    wget "https://github.com/$repo/releases/download/v2.2.0/appimagelauncher_2.2.0-travis995.0f91801.bionic_amd64.deb"
+    sudo dpkg -i appimage*.deb
     popd || return
 }
 
 setup_manual_apps() {
     c_yellow "Configuring manual apps"
+    setup_appimagelauncher
     setup_waterfox
     setup_thunderbird
     setup_delta
