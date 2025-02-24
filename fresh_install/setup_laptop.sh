@@ -3,7 +3,6 @@
 # Install: sh -c "$(curl -fsSL setup.ricardochaves.pt)"
 
 # TODO: Setup vsCode extensions
-# TODO: Completely setup oh-my-zsh configs
 # TODO: Setup Waterfox extensions, bookmarks
 # TODO: Setup regular usage files in private standalone repo:
 # - .zsh_history
@@ -181,6 +180,11 @@ setup_zsh() {
     fi
     sudo apt install -y zsh
     sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    c_yellow "Installing zsh plugins"
+
+    pushd $HOME/.oh-my-zsh/custom/plugins || return
+    cp -r "$SECRETS_DIR/oh-my-zsh/custom/plugins/*" .
+    popd || return
 }
 
 setup_secrets() {
