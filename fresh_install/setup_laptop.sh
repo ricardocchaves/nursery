@@ -3,10 +3,6 @@
 # Install: sh -c "$(curl -fsSL setup.ricardochaves.pt)"
 
 # TODO: Setup Waterfox extensions, bookmarks
-# TODO: Setup regular usage files in private standalone repo:
-# - .zsh_history
-# - .zshrc
-# - .gitconfig
 
 # Define color codes
 RED='\033[0;31m'
@@ -459,6 +455,8 @@ setup_git_repos() {
             git clone $url
             if [ "$repo" == "nursery_personal" ]; then
                 mv nursery nursery_personal
+            elif [ "$repo" == "home_configs" ]; then
+                bash "$HOME/repos/home_configs/dotfiles/setup.sh"
             fi
             apply_personal_git_config $repo
         done
