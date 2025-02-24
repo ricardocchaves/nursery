@@ -2,7 +2,6 @@
 # Setup fresh Ubuntu laptop
 # Install: sh -c "$(curl -fsSL setup.ricardochaves.pt)"
 
-# TODO: Setup vsCode extensions
 # TODO: Setup Waterfox extensions, bookmarks
 # TODO: Setup regular usage files in private standalone repo:
 # - .zsh_history
@@ -104,6 +103,13 @@ setup_apt() {
     sudo apt -y autoremove
 }
 
+setup_code() {
+    c_blue "Installing code"
+    mkdir -p "$HOME/.vscode"
+    cp -r "$SECRETS_DIR/vscode/*" "$HOME/.vscode"
+    sudo snap install --classic code
+}
+
 setup_snap() {
     c_yellow "Installing snap packages"
     pkgs="slack spotify discord vlc"
@@ -116,7 +122,7 @@ setup_snap() {
             fi
         done
         if ! snap list | grep -q "code"; then
-            sudo snap install --classic code
+            setup_code
         fi
     }
 
