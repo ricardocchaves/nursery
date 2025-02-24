@@ -85,7 +85,7 @@ configure_gnome_general() {
 }
 
 setup_apt() {
-    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils appimagelauncher python3-pip picocom sshpass tree ffmpeg wireguard cmake xclip iw wireshark-qt"
+    pkgs="curl vim git terminator meld jq bat lm-sensors htop moreutils cpufrequtils python3-pip picocom sshpass tree ffmpeg wireguard cmake xclip iw wireshark libfuse2 libportaudio2 pulseaudio-utils"
     to_install=""
     for pkg in $pkgs; do
         c_blue "Checking if $pkg is installed"
@@ -101,7 +101,7 @@ setup_apt() {
     # Trim leading and trailing whitespaces using sed
     to_install=$(echo "$to_install" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
     c_yellow "Installing missing apt packages [$to_install]"
-    sudo apt install -y "$to_install"
+    sudo apt install -y $to_install
     sudo apt -y autoremove
 }
 
@@ -190,7 +190,6 @@ setup_secrets() {
     pushd "$SECRETS_DIR" || return
     # Compress and download the secrets; faster than scp or rsync
     ssh -p 23 "$VAULT_URL" "tar czf - -C ~/.secrets_vault ." | tar xzf - -C .
-    SECRETS_DIR="$SECRETS_DIR/.secrets_vault"
     popd || return
 
     source "$SECRETS_DIR/config.sh"
@@ -202,7 +201,7 @@ setup_ssh() {
     c_yellow "Setting up SSH keys"
     ssh_dir="$HOME/.ssh"
     mkdir -p "$ssh_dir"
-    cp -r "$SECRETS_DIR/ssh" "$ssh_dir"
+    cp -r "$SECRETS_DIR/ssh/*" "$ssh_dir"
     find "$ssh_dir" -name "*.pub" | sed 's/\.pub//g' | while IFS= read -r key; do
         chmod 700 "$key"
         ssh-add "$key"
@@ -221,7 +220,7 @@ configure_custom_app() {
     config_dir="$HOME/.local/share/applications"
     remote_config="https://raw.githubusercontent.com/ricardocchaves/nursery/master/fresh_install/applications/$app_name.desktop"
     mkdir -p "$config_dir"
-    wget "$remote_config" -O "$config_dir/"
+    wget "$remote_config" > "$config_dir/$app_name.desktop"
     chmod +x "$HOME/$app_name.desktop"
 }
 
@@ -241,21 +240,34 @@ setup_waterfox() {
 
     # TODO: Use native icon without downloading
     mkdir -p ~/.local/share/icons/
-    curl https://www.waterfox.net/_astro/waterfox.aA4DFn78.svg -O ~/.local/share/icons/waterfox.ico
+    curl https://www.waterfox.net/_astro/waterfox.aA4DFn78.svg > ~/.local/share/icons/waterfox.ico
 
     configure_custom_app waterfox
 }
 
 setup_thunderbird() {
-    if ! thunderbird --version >/dev/null 2>&1; then
-        c_red "Install thunderbird manually!"
+    if thunderbird --version >/dev/null 2>&1; then
+        c_green "Thunderbird is already installed"
         return
     fi
+
+    c_yellow "Installing thunderbird"
+    pushd "$(mktemp -d)" || return
+    wget https://download-installer.cdn.mozilla.net/pub/thunderbird/releases/128.7.1esr/linux-x86_64/en-US/thunderbird-128.7.1esr.tar.bz2
+    tar -xvf thunderbird*.tar.bz2
+    sudo mv thunderbird /opt
+    sudo ln -s /opt/thunderbird/thunderbird /usr/bin/thunderbird
+    popd || return
 
     configure_custom_app thunderbird
 }
 
 setup_delta() {
+    if which delta 2>&1; then
+        c_green "Delta is already installed"
+	return
+    fi
+
     pushd "$(mktemp -d)" || return
     wget https://github.com/dandavison/delta/releases/download/0.17.0/git-delta_0.17.0_amd64.deb
     sudo dpkg -i git-delta_0.17.0_amd64.deb
@@ -276,7 +288,7 @@ download_config() {
 }
 
 setup_obsidian() {
-    if obsidian --version >/dev/null 2>&1; then
+    if obsidian --version >/dev/null 2>&1 || ls Applications | grep "Obsidian" ; then
         c_green "Obsidian is already installed"
         return
     fi
@@ -341,8 +353,13 @@ download_home_scripts() {
 
     # Use wget to download each file
     for file in $files; do
+	fname="$(basename "$file")"
+	if ls $HOME | grep $fname -q; then
+	    c_green "$fname already downloaded"
+	    continue
+	fi
         wget "$file" -P "$HOME"
-        chmod +x "$HOME/$(basename "$file")"
+        chmod +x "$HOME/$fname"
     done
 }
 
@@ -412,7 +429,7 @@ setup_git_repos() {
         done
     }
     clone_others() {
-        clone_urls="git@github.com:ricardocchaves/nursery.git git@github.com:ricardocchaves/notes.git"
+        clone_urls="git@github.com:ricardocchaves/nursery.git rchaves-ua:ricardocchaves/notes.git"
         for url in $clone_urls; do
             repo=$(basename $url .git)
             if [ -d "$repo" ]; then
@@ -442,6 +459,12 @@ setup_git_repos() {
     popd || return
 }
 
+setup_vpn() {
+    vpn_dir="$HOME/vpn"
+    mkdir -p $vpn_dir
+    cp -r "$SECRETS_DIR/vpn/*" "$vpn_dir"
+}
+
 setup_obsidian_notes() {
     c_yellow "Setting up Obsidian notes"
     vault_repo="$HOME/repos/notes/obsidian"
@@ -463,7 +486,9 @@ setup_vdoodle() {
         return
     fi
 
-    cp -r "$SECRETS_DIR/veniam" "$HOME/$(dirname "$VNM_CRED")"
+    mkdir -p "$HOME/.veniam"
+
+    cp -r "$SECRETS_DIR/veniam/*" "$HOME/$(dirname "$VNM_CRED")"
     if [ ! -f "$HOME/$VNM_CRED" ]; then
         c_red "Please create ~/$VNM_CRED"
         return
@@ -494,7 +519,8 @@ setup_vdoodle() {
     fi
 }
 
-setup_ambausb() {
+setup_ambausb() {	
+    source /tmp/tmp.0upMPi4U2v/config.sh
     if which ambausb >/dev/null 2>&1; then
         c_green "AmbaUSB is already installed"
         return
