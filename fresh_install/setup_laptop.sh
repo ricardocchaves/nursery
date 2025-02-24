@@ -391,9 +391,12 @@ setup_terminator() {
 setup_git_repos() {
     c_yellow "Cloning git repositories"
     apply_personal_git_config() {
+        repo=$1
+        pushd $repo || return
         git config --local user.name "Ricardo Chaves"
         git config --local user.email "ricardochaves@ua.pt"
         git config --local core.sshCommand "ssh -i ~/.ssh/ricardochaves_ua"
+        popd || return
     }
     clone_n1() {
         repo="nexar_n1"
@@ -416,6 +419,7 @@ setup_git_repos() {
 
         cp -r $repo "$NX_REPO_3"
         git -C "$NX_REPO_3" checkout "$NX_REPO_3_BRANCH"
+        git -C "$NX_REPO_3" submodule update --init nexar-client-sdk
 
         c_blue "Configuring podman"
         pushd "$NX_REPO_3" || return
@@ -439,26 +443,24 @@ setup_git_repos() {
         done
     }
     clone_others() {
-        clone_urls="git@github.com:ricardocchaves/nursery.git rchaves-ua:ricardocchaves/notes.git"
+        clone_urls="git@github.com:ricardocchaves/nursery.git rchaves-ua:ricardocchaves/notes.git rchaves-ua:ricardocchaves/home_configs.git"
         for url in $clone_urls; do
             repo=$(basename $url .git)
+            # Custom named repos
+            if [ "$repo" == "nursery" ]; then
+                repo="nursery_personal"
+            fi
+
             if [ -d "$repo" ]; then
                 c_green "$repo is already cloned"
                 continue
             fi
 
             git clone $url
-            if [ "$repo" == "nursery" ]; then
-                mv $repo nursery_personal
-                repo="nursery_personal"
-                pushd $repo || return
-                apply_personal_git_config
-                popd || return
-            elif [ "$repo" == "notes" ]; then
-                pushd $repo || return
-                apply_personal_git_config
-                popd || return
+            if [ "$repo" == "nursery_personal" ]; then
+                mv nursery nursery_personal
             fi
+            apply_personal_git_config $repo
         done
     }
     mkdir -p ~/repos
