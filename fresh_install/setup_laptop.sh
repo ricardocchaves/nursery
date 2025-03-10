@@ -368,6 +368,22 @@ download_home_scripts() {
     done
 }
 
+install_custom_scripts() {
+    c_yellow "Downloading custom scripts"
+
+    # Get the list of files in the folder
+    files=$(curl -s "https://api.github.com/repos/ricardocchaves/nursery/contents/script_global" | jq -r '.[] | select(.type=="file") | .download_url')
+
+    dest_dir="$(mktemp -d)"
+    # Use wget to download each file
+    for file in $files; do
+	    fname="$(basename "$file")"
+        wget "$file" -P "$dest_dir"
+        chmod +x "$dest_dir/$fname"
+        sudo mv "$dest_dir/$fname" /usr/local/bin/
+    done
+}
+
 setup_terminator() {
     c_yellow "Configuring Terminator"
 
@@ -581,6 +597,7 @@ setup_ssh
 setup_wireguard
 setup_manual_apps
 download_home_scripts
+install_custom_scripts
 setup_terminator
 configure_gnome_general
 configure_gnome_dock

@@ -1,0 +1,4 @@
+#!/bin/sh
+tar -xzvf $1
+mv firmware/nexar.bin .
+rm -rf firmware
