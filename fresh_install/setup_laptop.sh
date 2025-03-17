@@ -32,7 +32,7 @@ SECRETS_DIR=""
 
 init() {
     sudo apt update
-    sudo apt upgrade
+    sudo apt -y upgrade
 }
 
 is_setup_done() {
@@ -146,7 +146,7 @@ setup_docker() {
     c_yellow "Installing docker"
     # Add Docker's official GPG key:
     sudo apt-get update
-    sudo apt-get install ca-certificates curl
+    sudo apt-get install -y ca-certificates curl
     sudo install -y -m 0755 -d /etc/apt/keyrings
     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
     sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -555,7 +555,7 @@ setup_ambausb() {
     c_yellow "Setting up AmbaUSB"
     ambausb_repo="$HOME/repos/$NX_REPO_3"
     deb_path="$ambausb_repo/$NX_AMBAUSB_DEB"
-    sudo apt install libqt5multimedia5 # Dependencies
+    sudo apt install -y libqt5multimedia5 # Dependencies
     sudo dpkg -i "$deb_path"
 
     download_config "Ambarella/ambausb.conf"
