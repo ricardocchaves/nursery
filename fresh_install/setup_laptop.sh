@@ -335,6 +335,8 @@ setup_appimagelauncher() {
     pushd "$(mktemp -d)" || return
     repo="TheAssassin/AppImageLauncher"
     wget "https://github.com/$repo/releases/download/v2.2.0/appimagelauncher_2.2.0-travis995.0f91801.bionic_amd64.deb"
+    sudo apt install -y libqt5core5a libqt5gui5 libqt5widgets5 libqt5dbus5 libfuse2
+    sudo apt --fix-broken install -y
     sudo dpkg -i appimage*.deb
     popd || return
 }
