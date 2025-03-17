@@ -589,9 +589,9 @@ if ! is_setup_done; then
 fi
 
 setup_apt
+setup_secrets
 setup_snap
 setup_docker
-setup_secrets
 setup_aws
 setup_zsh
 setup_ssh
