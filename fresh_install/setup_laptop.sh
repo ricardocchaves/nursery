@@ -103,7 +103,7 @@ setup_apt() {
 setup_code() {
     c_blue "Installing code"
     mkdir -p "$HOME/.vscode"
-    cp -r "$SECRETS_DIR/vscode/*" "$HOME/.vscode"
+    cp -r ${SECRETS_DIR}/vscode/* "$HOME/.vscode"
     sudo snap install --classic code
 }
 
@@ -159,7 +159,6 @@ setup_docker() {
     sudo apt-get update
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
     sudo usermod -aG docker $USER
-    newgrp docker
 }
 
 setup_aws() {
@@ -185,7 +184,7 @@ setup_zsh() {
     c_yellow "Installing zsh plugins"
 
     pushd $HOME/.oh-my-zsh/custom/plugins || return
-    cp -r "$SECRETS_DIR/oh-my-zsh/custom/plugins/*" .
+    cp -r ${SECRETS_DIR}/oh-my-zsh/custom/plugins/* .
     popd || return
 }
 
@@ -207,7 +206,7 @@ setup_ssh() {
     c_yellow "Setting up SSH keys"
     ssh_dir="$HOME/.ssh"
     mkdir -p "$ssh_dir"
-    cp -r "$SECRETS_DIR/ssh/*" "$ssh_dir"
+    cp -r ${SECRETS_DIR}/ssh/* "$ssh_dir"
     find "$ssh_dir" -name "*.pub" | sed 's/\.pub//g' | while IFS= read -r key; do
         chmod 700 "$key"
         ssh-add "$key"
@@ -294,7 +293,7 @@ download_config() {
 }
 
 setup_obsidian() {
-    if obsidian --version >/dev/null 2>&1 || ls Applications | grep "Obsidian" ; then
+    if obsidian --version >/dev/null 2>&1 || ls $HOME/Applications | grep "Obsidian" ; then
         c_green "Obsidian is already installed"
         return
     fi
@@ -490,7 +489,7 @@ setup_git_repos() {
 setup_vpn() {
     vpn_dir="$HOME/vpn"
     mkdir -p $vpn_dir
-    cp -r "$SECRETS_DIR/vpn/*" "$vpn_dir"
+    cp -r ${SECRETS_DIR}/vpn/* "$vpn_dir"
 }
 
 setup_obsidian_notes() {
@@ -516,7 +515,7 @@ setup_vdoodle() {
 
     mkdir -p "$HOME/.veniam"
 
-    cp -r "$SECRETS_DIR/veniam/*" "$HOME/$(dirname "$VNM_CRED")"
+    cp -r ${SECRETS_DIR}/veniam/* "$HOME/$(dirname "$VNM_CRED")"
     if [ ! -f "$HOME/$VNM_CRED" ]; then
         c_red "Please create ~/$VNM_CRED"
         return
