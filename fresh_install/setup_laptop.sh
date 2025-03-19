@@ -312,6 +312,22 @@ setup_obsidian() {
     download_config "obsidian/obsidian.json"
 }
 
+setup_cursor() {
+    if cursor --version >/dev/null 2>&1; || ls $HOME/Applications | grep Cursor ; then
+        c_green "Cursor is already installed"
+        return
+    fi
+
+    c_yellow "Installing Cursor"
+    sudo sysctl kernel.unprivileged_userns_clone=1
+    pushd "$(mktemp -d)" || return
+    appimage="Cursor-0.47.8-82ef0f61c01d079d1b7e5ab04d88499d5af500e3.deb.glibc2.25-x86_64.AppImage"
+    wget "https://downloads.cursor.com/production/client/linux/x64/appimage/$appimage"
+    chmod +x "$appimage"
+    QT_QPA_PLATFORM=xcb ./"$appimage"
+    popd || return
+}
+
 setup_audacity() {
     if which audacity >/dev/null 2>&1; then
         c_green "Audacity is already installed"
@@ -346,11 +362,12 @@ setup_manual_apps() {
     setup_appimagelauncher
     setup_waterfox
     setup_thunderbird
+    sudo update-desktop-database ~/.local/share/applications/
     setup_delta
     setup_obsidian
+    setup_cursor
     setup_audacity
     sudo gtk-update-icon-cache /usr/share/icons/hicolor
-    sudo update-desktop-database
 }
 
 download_home_scripts() {
