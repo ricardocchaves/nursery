@@ -313,7 +313,7 @@ setup_obsidian() {
 }
 
 setup_cursor() {
-    if cursor --version >/dev/null 2>&1; || ls $HOME/Applications | grep Cursor ; then
+    if cursor --version >/dev/null 2>&1 || ls $HOME/Applications | grep Cursor ; then
         c_green "Cursor is already installed"
         return
     fi
@@ -507,7 +507,7 @@ setup_git_repos() {
 setup_vpn() {
     vpn_dir="$HOME/vpn"
     mkdir -p $vpn_dir
-    cp -r ${SECRETS_DIR}/vpn/* "$vpn_dir"
+    cp -r ${SECRETS_DIR}/vpn/* "${vpn_dir}/"
 }
 
 setup_obsidian_notes() {
